@@ -1,31 +1,24 @@
-const express = require("express");
-const { default: mongoose } = require("mongoose");
-require("dotenv").config();
+const express = require('express');
+const { default: mongoose } = require('mongoose');
+const fileUpload = require('express-fileupload');
 const app = express();
+const cookieParser = require('cookie-parser');
+
+require('dotenv').config();
 
 // Routes
-const postRoute = require("./routes/post.route");
 
+const { default: requestTime } = require('./middlewares/request-time');
+
+app.use(requestTime);
+app.use(cookieParser({}));
 app.use(express.json());
+app.use(express.static('static'));
+app.use(fileUpload());
 
-app.use("/api/post", postRoute);
+app.use('/api/post', require('./routes/post.route'));
 
-// app.get("/");
-
-// app.get("/post", (req, res) => {
-//   res.status(400).json({ massage: "Hello world" });
-// });
-
-// app.post("/", async (req, res) => {
-//   try {
-//     const { title, body } = req.body;
-
-//     const newPost = await postModel.create({ title, body });
-//     res.status(201).json(newPost);
-//   } catch (error) {
-//     res.status(500).json(error);
-//   }
-// });
+app.use('/api/auth', require('./routes/auth.route'));
 
 const DB_URL__MONGODB = process.env.DB_URL;
 
@@ -35,7 +28,7 @@ const dbConnected = async () => {
   try {
     await mongoose
       .connect(DB_URL__MONGODB)
-      .then(() => console.log("DB connected"));
+      .then(() => console.log('DB connected'));
     app.listen(PORT, () =>
       console.log(`Listening on -- http://localhost:${PORT}`)
     );
